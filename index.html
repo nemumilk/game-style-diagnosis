@@ -1,68 +1,242 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ゲームプレイスタイル診断</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ゲームプレイスタイル診断</title>
 
-    <style>
-        body{
-            font-family:sans-serif;
-            background:#111827;
-            color:white;
-            text-align:center;
-            padding:50px;
-        }
+<style>
+body{
+    font-family:sans-serif;
+    background:#111827;
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    margin:0;
+    padding:20px;
+}
 
-        .card{
-            max-width:700px;
-            margin:auto;
-            background:#1f2937;
-            padding:40px;
-            border-radius:20px;
-        }
+.card{
+    background:#1f2937;
+    max-width:700px;
+    width:100%;
+    padding:40px;
+    border-radius:20px;
+}
 
-        h1{
-            font-size:2.5rem;
-        }
+h1,h2{
+    text-align:center;
+}
 
-        button{
-            background:#3b82f6;
-            color:white;
-            border:none;
-            padding:15px 30px;
-            border-radius:10px;
-            font-size:1.1rem;
-            cursor:pointer;
-        }
+button{
+    width:100%;
+    margin-top:10px;
+    padding:15px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:16px;
+}
 
-        button:hover{
-            opacity:0.9;
-        }
-    </style>
+.answer{
+    background:#374151;
+    color:white;
+}
+
+.answer:hover{
+    background:#4b5563;
+}
+
+.startBtn{
+    background:#2563eb;
+    color:white;
+}
+
+.result{
+    font-size:20px;
+    line-height:1.8;
+}
+</style>
 </head>
 
 <body>
 
-<div class="card">
+<div class="card" id="app">
     <h1>ゲームプレイスタイル診断</h1>
 
     <p>
-        あなたのゲームに対する価値観と、
-        グループ内での役割を分析します。
+        あなたのゲームに対する価値観を分析します。
     </p>
 
-    <br>
-
-    <button onclick="startDiagnosis()">
+    <button class="startBtn" onclick="startDiagnosis()">
         診断を始める
     </button>
 </div>
 
 <script>
-function startDiagnosis(){
-    alert("診断ページは次の段階で作成します！");
+
+const questions = [
+
+{
+text:"負けるくらいなら多少つまらなくても勝ちたい",
+type:"fighter"
+},
+{
+text:"勝ったとしても面白くなければ満足できない",
+type:"tainer"
+},
+{
+text:"ゲームでは結果より過程が大事だ",
+type:"tainer"
+},
+{
+text:"負けた時は楽しさより先に敗因を考える",
+type:"fighter"
+},
+{
+text:"有利な戦法があるなら積極的に使うべきだ",
+type:"fighter"
+},
+{
+text:"みんなと同じ戦法を使うくらいなら不利でも別の方法を試したい",
+type:"tricky"
+},
+{
+text:"初見のゲームではまずルールの穴や強い行動を探す",
+type:"ruler"
+},
+{
+text:"効率が悪くても面白そうならやってみる",
+type:"tricky"
+},
+{
+text:"味方がふざけて負けると少しイラっとする",
+type:"fighter"
+},
+{
+text:"味方がふざけていても場が盛り上がっていれば気にならない",
+type:"tainer"
+},
+{
+text:"チーム戦では役割分担や作戦が重要だと思う",
+type:"ruler"
+},
+{
+text:"作戦通りより予想外の展開の方が楽しい",
+type:"tricky"
+},
+{
+text:"まずは勝つ方法を見つけたい",
+type:"fighter"
+},
+{
+text:"まずは最適な攻略法を見つけたい",
+type:"ruler"
+},
+{
+text:"まずはみんなで楽しみたい",
+type:"tainer"
+},
+{
+text:"まずは変なことを試したい",
+type:"tricky"
 }
+];
+
+let currentQuestion = 0;
+
+let score = {
+fighter:0,
+ruler:0,
+tainer:0,
+tricky:0
+};
+
+const answers = [
+{label:"とてもそう思う",point:5},
+{label:"ややそう思う",point:4},
+{label:"どちらでもない",point:3},
+{label:"あまりそう思わない",point:2},
+{label:"全くそう思わない",point:1}
+];
+
+function startDiagnosis(){
+    showQuestion();
+}
+
+function showQuestion(){
+
+    const q = questions[currentQuestion];
+
+    let html = `
+    <h2>質問 ${currentQuestion+1} / ${questions.length}</h2>
+    <p>${q.text}</p>
+    `;
+
+    answers.forEach(a=>{
+        html += `
+        <button class="answer"
+        onclick="answerQuestion(${a.point})">
+        ${a.label}
+        </button>
+        `;
+    });
+
+    document.getElementById("app").innerHTML = html;
+}
+
+function answerQuestion(point){
+
+    const type = questions[currentQuestion].type;
+
+    score[type] += point;
+
+    currentQuestion++;
+
+    if(currentQuestion < questions.length){
+        showQuestion();
+    }else{
+        showResult();
+    }
+}
+
+function showResult(){
+
+    let winner = "fighter";
+
+    for(let key in score){
+        if(score[key] > score[winner]){
+            winner = key;
+        }
+    }
+
+    const names = {
+        fighter:"ファイター",
+        ruler:"ルーラー",
+        tainer:"テイナー",
+        tricky:"トリッキー"
+    };
+
+    document.getElementById("app").innerHTML = `
+    <h1>診断結果</h1>
+
+    <div class="result">
+
+    ファイター：${score.fighter}<br>
+    ルーラー：${score.ruler}<br>
+    テイナー：${score.tainer}<br>
+    トリッキー：${score.tricky}<br><br>
+
+    <strong>
+    あなたは「${names[winner]}」タイプです！
+    </strong>
+
+    </div>
+    `;
+}
+
 </script>
 
 </body>
